@@ -30,6 +30,16 @@ struct RswiftGeneratePublicResources: BuildToolPlugin {
         let bundleSource = target.kind == .generic ? "module" : "finder"
         let description = "\(target.kind) module \(target.name)"
 
+        let customArguments: [String]
+        let customArgumentFile = context.package.directory.appending([".rswiftarguments"])
+
+        do {
+            let data = try String(contentsOfFile: customArgumentFile.string, encoding: .utf8)
+            customArguments = data.components(separatedBy: .newlines)
+        } catch {
+            customArguments = []
+        }
+
         return [
             .buildCommand(
                 displayName: "R.swift generate resources for \(description)",
@@ -39,7 +49,7 @@ struct RswiftGeneratePublicResources: BuildToolPlugin {
                     "--input-type", "input-files",
                     "--bundle-source", bundleSource,
                     "--access-level", "public",
-                ] + inputFilesArguments,
+                ] + inputFilesArguments + customArguments,
                 outputFiles: [rswiftPath]
             ),
         ]
@@ -67,6 +77,16 @@ extension RswiftGeneratePublicResources: XcodeBuildToolPlugin {
             description = target.displayName
         }
 
+        let customArguments: [String]
+        let customArgumentFile = context.xcodeProject.directory.appending([".rswiftarguments"])
+
+        do {
+            let data = try String(contentsOfFile: customArgumentFile.string, encoding: .utf8)
+            customArguments = data.components(separatedBy: .newlines)
+        } catch {
+            customArguments = []
+        }
+
         return [
             .buildCommand(
                 displayName: "R.swift generate resources for \(description)",
@@ -77,7 +97,7 @@ extension RswiftGeneratePublicResources: XcodeBuildToolPlugin {
                     "--input-type", "xcodeproj",
                     "--bundle-source", "finder",
                     "--access-level", "public",
-                ],
+                ] + customArguments,
                 outputFiles: [rswiftPath]
             ),
         ]
