@@ -7,7 +7,7 @@ struct XCString: Decodable {
 }
 
 struct XCStringString: Decodable {
-    let localizations: [String: XCLocalization]
+    let localizations: [String: XCLocalization]?
 }
 
 struct XCLocalization: Decodable {
